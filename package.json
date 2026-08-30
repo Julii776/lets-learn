@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "16.3.3",
@@ -20,8 +21,18 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "pnpm biome check --write --no-errors-on-unmatched"
+    ],
+    "*.{json,css,md}": [
+      "pnpm biome format --write --no-errors-on-unmatched"
+    ]
   },
   "packageManager": "pnpm@10.25.0"
 }
