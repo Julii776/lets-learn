@@ -32,11 +32,13 @@ const LoginForm = () => {
 
   const handleLogin = async (data: LoginSchemaType) => {
     try {
-      await AuthApi.login(data);
+      const res = await AuthApi.login(data);
+      const accessToken = res.data.accessToken;
+      localStorage.setItem('access-token', accessToken);
 
       toast.success('Login successfully');
       router.push(APP_ROUTES.DASHBOARD);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Login failed');
     }
   };
