@@ -1,5 +1,7 @@
+import LearningGoals from '@/components/onboarding/learning-goals';
+
 const page = () => {
-  return <div>learn skills</div>;
+  return <LearningGoals />;
 };
 
 export default page;
