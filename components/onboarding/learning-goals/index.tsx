@@ -1,4 +1,5 @@
 'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, X } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -31,6 +32,7 @@ import SkillSearchInput from '../teaching-skills/search-input';
 
 const LearningGoals = () => {
   const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -48,11 +50,16 @@ const LearningGoals = () => {
   });
 
   const handleAddSuggestion = (skill: Skill) => {
-    append({ skillId: skill.id, skillName: skill.name });
+    append({
+      skillId: skill.id,
+      skillName: skill.name,
+    });
   };
 
   const handleAddCustom = (name: string) => {
-    append({ skillName: name });
+    append({
+      skillName: name,
+    });
   };
 
   const onSubmit = async (values: LearningGoalsFormValues) => {
@@ -61,65 +68,85 @@ const LearningGoals = () => {
       return;
     }
 
-    const payload = toLearningGoalsPayload(values);
     try {
+      const payload = toLearningGoalsPayload(values);
+
       await UsersApi.addLearningGoals(payload);
+
       router.push(APP_ROUTES.ONBOARDING.COMPLETE);
     } catch (_err) {
-      toast.error('Something went wrongg');
+      toast.error('Something went wrong. Please try again.');
     }
+  };
+
+  const handleSkip = () => {
+    router.push(APP_ROUTES.ONBOARDING.COMPLETE);
   };
 
   return (
     <Dialog open={true}>
-      <DialogContent showCloseButton={false} className="max-w-lg">
-        <DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-lg gap-0 p-6 sm:p-8"
+      >
+        <DialogHeader className="mb-7 items-center text-center">
           <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.25em] text-primary">
             Step 03 / 04
           </p>
-
-          <DialogTitle className="text-3xl font-bold tracking-[-0.04em] md:text-4xl">
-            Your Learning Goals
+          <DialogTitle className="text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
+            What do you want to learn?
           </DialogTitle>
 
-          <DialogDescription>
-            Tell us what do you want to learn.
+          <DialogDescription className="mt-2 max-w-md text-sm leading-6">
+            Add a few skills you&apos;re curious about. We&apos;ll use them to
+            help you discover people who can teach you.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <SkillSearchInput
-            existingNames={fields.map((f) => f.skillName || '')}
-            onAddSuggestion={handleAddSuggestion}
-            onAddCustom={handleAddCustom}
-          />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-3">
+            <SkillSearchInput
+              existingNames={fields.map((field) => field.skillName || '')}
+              onAddSuggestion={handleAddSuggestion}
+              onAddCustom={handleAddCustom}
+            />
 
-          <div className="flex gap-2 flex-wrap">
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="border border-primary bg-primary/10 text-primary rounded-2xl p-2 py-1 flex gap-2 items-center font-medium text-muted-foreground"
-              >
-                {field.skillName}
-                <button
-                  type="button"
-                  className="hover:text-foreground"
-                  onClick={() => remove(index)}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
+            <p className="px-1 text-xs text-muted-foreground">
+              Search for a skill or add your own.
+            </p>
           </div>
 
-          <div className="w-full flex justify-end gap-4">
+          {!!fields.length && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="group flex items-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:border-primary/40 hover:bg-primary/10"
+                >
+                  <span>{field.skillName}</span>
+
+                  <button
+                    type="button"
+                    aria-label={`Remove ${field.skillName}`}
+                    className="ml-0.5 rounded-full p-0.5 text-primary/50 transition-colors hover:bg-primary/10 hover:text-primary"
+                    onClick={() => remove(index)}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between border-t pt-5">
             <Button
               type="button"
+              variant="ghost"
               disabled={isSubmitting}
-              variant="outline"
-              onClick={() => router.push(APP_ROUTES.ONBOARDING.COMPLETE)}
+              onClick={handleSkip}
+              className="text-muted-foreground"
             >
-              Skip
+              Skip for now
             </Button>
 
             <Button type="submit" disabled={isSubmitting}>

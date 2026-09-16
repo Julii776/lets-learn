@@ -57,6 +57,7 @@ const TeachSkillsDialog = () => {
 
   const handleAddSuggestion = (skill: SkillSuggestion) => {
     if (isMaxed) return;
+
     append({
       skillId: skill.id,
       name: skill.name,
@@ -66,6 +67,7 @@ const TeachSkillsDialog = () => {
 
   const handleAddCustom = (name: string) => {
     if (isMaxed) return;
+
     append({
       skillName: name,
       name,
@@ -74,7 +76,10 @@ const TeachSkillsDialog = () => {
   };
 
   const handleExperienceChange = (index: number, level: SkillExperience) => {
-    update(index, { ...fields[index], experience: level });
+    update(index, {
+      ...fields[index],
+      experience: level,
+    });
   };
 
   const onSubmit = async (values: TeachingSkillsFormValues) => {
@@ -82,61 +87,95 @@ const TeachSkillsDialog = () => {
       router.push(APP_ROUTES.ONBOARDING.LEARNING_GOALS);
       return;
     }
+
     try {
       const payload = toTeachingSkillsPayload(values);
 
       await UsersApi.addTeachingSkills(payload);
+
       router.push(APP_ROUTES.ONBOARDING.LEARNING_GOALS);
     } catch (_err) {
-      toast.error('Something went wrongg');
+      toast.error('Something went wrong. Please try again.');
     }
+  };
+
+  const handleSkip = () => {
+    router.push(APP_ROUTES.ONBOARDING.LEARNING_GOALS);
   };
 
   return (
     <Dialog open={true}>
-      <DialogContent showCloseButton={false} className="max-w-lg">
-        <DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-lg gap-0 p-6 sm:p-8"
+      >
+        <DialogHeader className="mb-7 items-center text-center">
           <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.25em] text-primary">
             Step 02 / 04
           </p>
 
-          <DialogTitle className="text-3xl font-bold tracking-[-0.04em] md:text-4xl">
-            Your Skills
+          <DialogTitle className="text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
+            What can you teach?
           </DialogTitle>
 
-          <DialogDescription>
-            Add up to 5 skills you want to share.
+          <DialogDescription className="mt-2 max-w-md text-sm leading-6">
+            Share the skills you&apos;re comfortable helping others learn.
+            Choose up to {MAX_SKILLS}.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {fields.map((field, index) => (
-            <SkillCard
-              key={field.id}
-              skill={field}
-              errorMessage={errors.teachingSkills?.[index]?.skillName?.message}
-              onRemove={() => remove(index)}
-              onExperienceChange={(level) =>
-                handleExperienceChange(index, level)
-              }
-            />
-          ))}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {!isMaxed ? (
+            <div className="space-y-3">
+              <SkillSearchInput
+                existingNames={fields.map((field) => field.name)}
+                onAddSuggestion={handleAddSuggestion}
+                onAddCustom={handleAddCustom}
+              />
 
-          <SkillSearchInput
-            disabled={isMaxed}
-            existingNames={fields.map((f) => f.name)}
-            onAddSuggestion={handleAddSuggestion}
-            onAddCustom={handleAddCustom}
-          />
+              <p className="px-1 text-xs text-muted-foreground">
+                Search for a skill or add your own.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed bg-muted/30 px-5 py-4 text-center">
+              <p className="text-sm font-medium">
+                You&apos;ve added {MAX_SKILLS} skills
+              </p>
 
-          <div className="w-full flex justify-end gap-4">
+              <p className="mt-1 text-xs text-muted-foreground">
+                Remove a skill if you want to add another one.
+              </p>
+            </div>
+          )}
+
+          {!!fields.length && (
+            <div className="space-y-3 mt-6 max-h-40 overflow-y-auto p-1">
+              {fields.map((field, index) => (
+                <SkillCard
+                  key={field.id}
+                  skill={field}
+                  errorMessage={
+                    errors.teachingSkills?.[index]?.skillName?.message
+                  }
+                  onRemove={() => remove(index)}
+                  onExperienceChange={(level) =>
+                    handleExperienceChange(index, level)
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between border-t pt-5">
             <Button
               type="button"
+              variant="ghost"
               disabled={isSubmitting}
-              variant="outline"
-              onClick={() => router.push(APP_ROUTES.ONBOARDING.LEARNING_GOALS)}
+              onClick={handleSkip}
+              className="text-muted-foreground"
             >
-              Skip
+              Skip for now
             </Button>
 
             <Button type="submit" disabled={isSubmitting}>
