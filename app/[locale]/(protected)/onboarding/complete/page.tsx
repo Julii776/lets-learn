@@ -1,5 +1,7 @@
+import OnboardingComplete from '@/components/onboarding/complete';
+
 const page = () => {
-  return <div>complete</div>;
+  return <OnboardingComplete />;
 };
 
 export default page;
