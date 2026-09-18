@@ -14,8 +14,12 @@ import InputField from '@/components/form/input-field';
 import { Button } from '@/components/ui/button';
 
 import { Link, useRouter } from '@/i18n/navigation';
+import { useUserStore } from '@/stores/user-store';
 
 const LoginForm = () => {
+  const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
+
   const {
     handleSubmit,
     control,
@@ -28,13 +32,13 @@ const LoginForm = () => {
     },
   });
 
-  const router = useRouter();
-
   const handleLogin = async (data: LoginSchemaType) => {
     try {
       const res = await AuthApi.login(data);
-      const accessToken = res.data.accessToken;
+      const { accessToken, user } = res.data;
+
       localStorage.setItem('access-token', accessToken);
+      setUser(user);
 
       toast.success('Login successfully');
       router.push(APP_ROUTES.DASHBOARD);
