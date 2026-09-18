@@ -187,3 +187,7 @@
     @apply font-heading;
   }
 }
+
+.react-select .select__control {
+  @apply rounded-md border-input;
+}
